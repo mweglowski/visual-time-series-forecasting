@@ -1,0 +1,15 @@
+Current:
+* implement loss (JSD)
+* implement evaluation metrics
+* get data from different periods (train | val,test) and test it on them
+* train, evaluate and save model in specific models dir
+
+After:
+* make distributions on images instead of only 1s and 0s - anti-aliasing?
+* test different layers, kernel, stride, padding, dilation
+* build the same architecture as in paper
+
+Maybe:
+* generate data with anti-aliasing (paper)
+* comparison with numeric algorithms - ARIMA, numericAE, LSTMs? (paper)
+* test on different datasets (paper)
