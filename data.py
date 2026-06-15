@@ -4,10 +4,47 @@ import yfinance as yf
 import numpy as np
 import torch
 
-def get_data():
-    data = yf.download('BTC-USD', start='2016-06-01', end='2026-06-01')
-    values = data['Close']['BTC-USD'].values
+def get_financial_data():
+    # data = yf.download('BTC-USD', start='2016-06-01', end='2026-06-01')
+    # values = data['Close']['BTC-USD'].values
+    data = yf.download('^GSPC', start='1926-06-01', end='2026-06-01')
+    values = data['Close']['^GSPC'].values
     return values
+
+# def get_harmonic_data(num_examples=10000, sample_len=80):
+#     '''
+#     Generates an array of independent 1D time-series vectors.
+#     Shape: (num_examples, sample_len)
+#     '''
+#     print(f"🔮 Synthesizing {num_examples} independent harmonic samples...")
+#     # Pre-allocate a 2D array
+#     numeric_series = np.zeros((num_examples, sample_len), dtype=np.float32)
+    
+#     t = np.arange(1, sample_len + 1)
+    
+#     for i in range(num_examples):
+#         A1 = np.random.normal(1.0, 0.5)
+#         A2 = np.random.normal(1.0, 0.5)
+        
+#         B1 = np.random.uniform(-1.0 / sample_len, 1.0 / sample_len)
+#         B2 = np.random.uniform(-1.0 / sample_len, 1.0 / sample_len)
+        
+#         T1 = np.random.normal(sample_len / 5.0, sample_len / 10.0)
+#         while T1 <= 1.0: T1 = np.random.normal(sample_len / 5.0, sample_len / 10.0)
+            
+#         T2 = np.random.normal(sample_len, sample_len / 2.0)
+#         while T2 <= 1.0: T2 = np.random.normal(sample_len, sample_len / 2.0)
+            
+#         phi1 = np.random.uniform(0.0, 2.0 * np.pi)
+#         phi2 = np.random.uniform(0.0, 2.0 * np.pi)
+        
+#         wave1 = (A1 + B1 * t) * np.sin(2.0 * np.pi * t / T1 + phi1)
+#         wave2 = (A2 + B2 * t) * np.sin(2.0 * np.pi * t / T2 + phi2)
+        
+#         # Save directly to the row, no extending
+#         numeric_series[i] = wave1 + wave2
+        
+#     return numeric_series
 
 def divide_into_image_windows(values, window_len=80):
     # sliding window
@@ -95,8 +132,61 @@ def build_dataloaders(X_tensor, Y_tensor, batch_size=128):
     test_loader  = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
     return train_loader, val_loader, test_loader
 
+def plot_train_val_test(values):
+    split_val = int(len(values) * 0.8)
+    split_test = int(len(values) * 0.9)
+    
+    train = values[:split_val]
+    val = values[split_val:split_test]
+    test = values[split_test:]
+    
+    width_ratios = [len(train), len(val), len(test)]
+    fig1, ax = plt.subplots(
+        1, 3, 
+        figsize=(14, 5), 
+        sharey=True, 
+        gridspec_kw={'width_ratios': width_ratios}
+    )
+    ax[0].plot(train, color='black', linewidth=1.5)
+    ax[0].set_title(f'Train (n={len(train)})')
+    ax[0].grid(True, alpha=0.3)
+    ax[1].plot(val, color='black', linewidth=1.5)
+    ax[1].set_title(f'Val (n={len(val)})')
+    ax[1].grid(True, alpha=0.3)
+    ax[2].plot(test, color='black', linewidth=1.5)
+    ax[2].set_title(f'Test (n={len(test)})')
+    ax[2].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('visualizations/train_val_test_series_comparison.jpg', dpi=300)
+    plt.show()
+    
+    # Full values plot
+    plt.figure(figsize=(14, 5))
+    plt.plot(values, color='black', linewidth=1.5, label='Asset Sequence')
+    
+    plt.axvspan(0, split_val, color='blue', alpha=0.08, label='Train Regime (80%)')
+    plt.axvspan(split_val, split_test, color='orange', alpha=0.12, label='Validation Regime (10%)')
+    plt.axvspan(split_test, len(values), color='green', alpha=0.12, label='Out-of-Sample Test (10%)')
+    
+    plt.axvline(x=split_val, color='orange', linestyle='--', linewidth=1.2, alpha=0.7)
+    plt.axvline(x=split_test, color='green', linestyle='--', linewidth=1.2, alpha=0.7)
+    
+    plt.title('Continuous Sequential Dataset Splits & Evaluation Bounds')
+    plt.xlabel('Timeline Index (Chronological Sequence)')
+    plt.ylabel('Normalized Price / Value')
+    plt.xlim(0, len(values))
+    plt.legend(loc='upper left')
+    plt.grid(True, alpha=0.2)
+    
+    plt.tight_layout()
+    plt.savefig('visualizations/timeline_datasets_areas.jpg', dpi=300)
+    plt.show()
+
 def main():
-    values = get_data()
+    values = get_financial_data()
+    # values = get_harmonic_data()
+    print(len(values))
     window_len = 80
     window_sight_limit = 60 # 60/80=0.75 -> train sample see 75% of window 
 
@@ -104,6 +194,7 @@ def main():
     images, windows = divide_into_image_windows(values, window_len)
     X, Y = split_into_x_y(images, window_sight_limit)
 
+    plot_train_val_test(values)
     compare_series_charts(images, windows, 5)
     show_x_y_difference(X[0], Y[0])
 

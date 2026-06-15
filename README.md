@@ -8,6 +8,8 @@ In this project, similarly to what have been presented in this [paper](https://a
 ### Data source
 yfinance
 getting close date
+btc-usd
+then for a while sp500 ^GSPC
 
 ### what open & close mean in financial context?
 * Open: The price at which the asset started trading when the market opened for that specific day.
@@ -33,8 +35,16 @@ Quant Context: High volume means a price movement has strong backing and institu
 ### Creating visual encoder-decoder
 
 ## Training
+Made using NVIDIA RTX 2060 6B. All trainings were saved in the following files and directories:
+* `experiments.md` - all trainings details, what has been changed in specific experiment, parameters, architecture, metrics, charts
+* `weights/` - models weights with alignment to specific experiment number
+* `visualizations/training/` - place where training charts are stored
 
+bitcoin is really hard to predict (see on wpe metric) charts
+couldn't achieve good results
+switched to ^gspc (sp&500?) which has more data (since 1927, almost 100 years)
 
+tried harmonic, but I was disappointed by the results
 
 ## Interesting facts beyond this project
 * Discrete probability distribution in which whole probability mass (1.0) is focused only in one point is *Dirac distribution*
@@ -42,6 +52,16 @@ Quant Context: High volume means a price movement has strong backing and institu
     * .copy() on np.ndarray - deep copy, totally separated
     * .copy() on list - shallow copy, nested lists are mutable
     * a = b - reference to the same object in memory
+
+## What could be done in the future?
+* more time on understanding more deeply the math
+* usage of other different types of layers in auto-encoder like residual blocks, pooling layers instead of conv transpose
+* maybe don't generate X matrices that have only one 1 in column, do some kind of anti-aliasing, make this matrix more like a line plot
+* other evaluation metrics (ex. SMAPE)
+* compare with numeric models like (ARIMA, numericAE, LSTMs)
+* test on more number of datasets from different domains, synthetic, medical (ECG, like in paper), weather, other financial assets
+* combine different models and modalities, like add car or truck detectors near some crucial areas for market, X posts analysis, audio and emotion prediction on conferences
+* implement WPE metric and show complexity difference across datasets
 
 ## Sources
 * [Visual Time Series Forecasting: An Image-driven Approach](https://arxiv.org/pdf/2011.09052)

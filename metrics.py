@@ -33,7 +33,7 @@ def jsd_loss(y_pred, y_true):
     jsd = 0.5 * (kl_div_p + kl_div_q).sum(dim=1).mean(dim=1).mean()
     return jsd
 
-def iou(y_pred, y_true):
+def iou(y_pred, y_true, device):
     '''Compute col-wise 1D IoU'''
     y_pred = y_pred.squeeze(1) # NCHW -> NHW
     y_true = y_true.squeeze(1)
@@ -41,7 +41,7 @@ def iou(y_pred, y_true):
     batch_size, height, width = y_pred.shape
 
     # Create height indices [0, 1, ..., height] and reshape to (1, height, 1) - column vector
-    row_coords = torch.arange(height).view(1, height, 1)
+    row_coords = torch.arange(height, device=device).view(1, height, 1)
 
     # Generate masks
     pred_mask = y_pred > threshold
