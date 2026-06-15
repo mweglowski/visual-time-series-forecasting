@@ -30,7 +30,7 @@ Quant Context: High volume means a price movement has strong backing and institu
 
 ## Model implementation
 
-### Creating visual auto-encoder
+### Creating visual encoder-decoder
 
 ## Interesting facts
 * Discrete probability distribution in which whole probability mass (1.0) is focused only in one point is *Dirac distribution*
