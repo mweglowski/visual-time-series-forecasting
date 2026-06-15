@@ -1,51 +1,60 @@
 from torch import nn
 
-class Encoder(nn.Module):
-    def __init__(self):
+class VisualAE(nn.Module):
+    '''Reusable Visual Auto-Encoder class'''
+    def __init__(self, encoder, decoder):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(64, 32, 3, 1, 1)
-        self.conv3 = nn.Conv2d(32, 16, 3, 1, 1)
+        self.encoder = encoder
+        self.decoder = decoder
+        
+    def forward(self, x):
+        latent = self.encoder(x)
+        output = self.decoder(latent)
+        return output
+    
+class EncoderPlainConv(nn.Module):
+    def __init__(self, latent_dim=512):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=2, padding=1) # 80x80 -> 40x40
+        self.conv2 = nn.Conv2d(64, 32, 3, 2, 1) # 40x40 -> 20x20
+        self.conv3 = nn.Conv2d(32, 16, 3, 2, 1) # 20x20 -> 10x10
         self.relu = nn.ReLU()
-        self.flatten = nn.Flatten()
-        self.linear = nn.Linear(16 * 80 * 80, 128)
+        self.flatten = nn.Flatten() # 16x10x10 -> 1600
+        self.linear = nn.Linear(1600, latent_dim)
 
     def forward(self, x):
-        print('input:', x.shape) # NCHW
         x = self.relu(self.conv1(x))
-        print('conv1:', x.shape)
+        # print(x.shape)
         x = self.relu(self.conv2(x))
-        print('conv2:', x.shape)
+        # print(x.shape)
         x = self.relu(self.conv3(x))
-        print('conv3:', x.shape)
+        # print(x.shape)
         x = self.flatten(x)
-        print('flatten:', x.shape)
+        # print(x.shape)
         x = self.linear(x)
-        print('linear:', x.shape)
+        # print(x.shape)
         return x
 
-class Decoder(nn.Module):
-    def __init__(self, in_features):
+class DecoderPlainConv(nn.Module):
+    def __init__(self, latent_dim=512):
         super().__init__()
-        self.linear = nn.Linear(in_features, 102400)
-        self.conv1 = nn.ConvTranspose2d(16, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.ConvTranspose2d(32, 64, 3, 1, 1)
-        self.conv3 = nn.ConvTranspose2d(64, 1, 3, 1, 1)
+        self.linear = nn.Linear(latent_dim, 1600)
+        self.conv1 = nn.ConvTranspose2d(16, 32, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.conv2 = nn.ConvTranspose2d(32, 64, 3, 2, 1, 1)
+        self.conv3 = nn.ConvTranspose2d(64, 1, 3, 2, 1, 1)
         self.relu = nn.ReLU()
         self.flatten = nn.Flatten()
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        print('input:', x.shape) # latent space
         x = self.linear(x)
-        print('linear:', x.shape)
-        x = x.reshape(x.shape[0], 16, 80, 80)
-        print('reshaped:', x.shape)
+        # print(x.shape)
+        x = x.reshape(x.shape[0], 16, 10, 10)
+        # print(x.shape)
         x = self.relu(self.conv1(x))
-        print('conv1:', x.shape)
+        # print(x.shape)
         x = self.relu(self.conv2(x))
-        print('conv2:', x.shape)
-        x = self.relu(self.conv3(x))
-        print('conv3:', x.shape)
-        x = self.sigmoid(x)
+        # print(x.shape)
+        x = self.sigmoid(self.conv3(x))
+        # print(x.shape)
         return x

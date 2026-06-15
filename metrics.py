@@ -1,4 +1,4 @@
-from torch.nn.functional import F
+import torch.nn.functional as F
 import torch
 
 def jsd_loss(y_pred, y_true):

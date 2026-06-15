@@ -32,7 +32,11 @@ Quant Context: High volume means a price movement has strong backing and institu
 
 ### Creating visual encoder-decoder
 
-## Interesting facts
+## Training
+
+
+
+## Interesting facts beyond this project
 * Discrete probability distribution in which whole probability mass (1.0) is focused only in one point is *Dirac distribution*
 * Copies in Python:
     * .copy() on np.ndarray - deep copy, totally separated
