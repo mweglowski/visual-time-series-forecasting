@@ -32,16 +32,13 @@ In this project, similarly to what have been presented in this [paper](https://a
 
 ## Data Preparation
 
-### Some financial context
-* Open: The price at which the asset started trading when the market opened for that specific day.
-* Close: The final price at which the asset traded when the market closed for the day. **correct since it is adjusted close by default probably**
-Quant Context: In crypto, markets trade 24/7, so "Open" and "Close" are just tied to midnight UTC. For traditional stocks, it represents the formal market hours (e.g., 9:30 AM to 4:00 PM EST). **DIVE DEEPER**
-* High: The absolute highest price that someone paid for the asset during that single day.
-* Low: The absolute lowest price reached during that day.
-Quant Context: Together with Open and Close, these four metrics make up OHLC data. They are used to draw the classic vertical "candlestick" charts you see on trading screens. **DIVE DEEPER**
-* Volume: The total number of units (e.g., shares of stock or total Bitcoins) traded between buyers and sellers during that day.
-Quant Context: High volume means a price movement has strong backing and institutional interest. Low volume often means a trend is weak or a false breakout. **DIVE DEEPER**
-> We will be using only `Close` column
+### Financial Context
+* **Open**: The price at which the asset started trading when the market opened for that specific day.
+* **Close**: The final price at which the asset traded when the market closed for the day. **correct since it is adjusted close by default probably**
+* **High**: The absolute highest price that someone paid for the asset during that single day.
+* **Low**: The absolute lowest price reached during that day.
+* **Volume**: The total number of units (e.g., shares of stock or total Bitcoins) traded between buyers and sellers during that day.
+> We will be using only `Close` column from yahoo finance.
 
 ### Data Source
 Data has been fetched using `yfinance` library. Assets related to `BTC-USD` were downloaded from period 2016-06-01 -> 2026-06-01 which gave **3652** days and for `^GSPC` from the total beginning to 2026-06-01 which were approximately from after half a year from 1926-06-01, which gave in total about 100 years of data, exactly **24719** days.
@@ -70,13 +67,6 @@ Here are placed a few charts that show how our training and val/test data will l
 ![timeline datasets areas](visualizations/gspc/timeline_datasets_areas.jpg)
 
 ![btc charts comparison](visualizations/gspc/charts_comparison.jpg)
-
-TODO:
-* losses, from notebook maybe take some texts
-* optimizers, mention lr, weight decay, and lr reduction on plateau
-* training
-* all params
-* history of training, what was the best, failures, switch to other data, different models, bn really good
 
 ## Model Implementation
 
