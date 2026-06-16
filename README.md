@@ -32,6 +32,17 @@ In this project, similarly to what have been presented in this [paper](https://a
 
 ## Data Preparation
 
+### Some financial context
+* Open: The price at which the asset started trading when the market opened for that specific day.
+* Close: The final price at which the asset traded when the market closed for the day. **correct since it is adjusted close by default probably**
+Quant Context: In crypto, markets trade 24/7, so "Open" and "Close" are just tied to midnight UTC. For traditional stocks, it represents the formal market hours (e.g., 9:30 AM to 4:00 PM EST). **DIVE DEEPER**
+* High: The absolute highest price that someone paid for the asset during that single day.
+* Low: The absolute lowest price reached during that day.
+Quant Context: Together with Open and Close, these four metrics make up OHLC data. They are used to draw the classic vertical "candlestick" charts you see on trading screens. **DIVE DEEPER**
+* Volume: The total number of units (e.g., shares of stock or total Bitcoins) traded between buyers and sellers during that day.
+Quant Context: High volume means a price movement has strong backing and institutional interest. Low volume often means a trend is weak or a false breakout. **DIVE DEEPER**
+> We will be using only `Close` column
+
 ### Data Source
 Data has been fetched using `yfinance` library. Assets related to `BTC-USD` were downloaded from period 2016-06-01 -> 2026-06-01 which gave **3652** days and for `^GSPC` from the total beginning to 2026-06-01 which were approximately from after half a year from 1926-06-01, which gave in total about 100 years of data, exactly **24719** days.
 
@@ -59,6 +70,13 @@ Here are placed a few charts that show how our training and val/test data will l
 ![timeline datasets areas](visualizations/gspc/timeline_datasets_areas.jpg)
 
 ![btc charts comparison](visualizations/gspc/charts_comparison.jpg)
+
+TODO:
+* losses, from notebook maybe take some texts
+* optimizers, mention lr, weight decay, and lr reduction on plateau
+* training
+* all params
+* history of training, what was the best, failures, switch to other data, different models, bn really good
 
 ## Model Implementation
 
@@ -171,15 +189,31 @@ In addition `ReduceLROnPlateau` scheduler has been used to reduce by multiplicat
 ### Experiments
 Starting from simple AE architecture, I was using only **convolutional** layers followed by **relu** activations.
 
-I was constantly changing number of channels inside **convolutional** layers, their **kernel** (3, 5, 7) and **padding** (1, 2) sizes as well as **latent** dimensions. Unfortunately the order order of layer channel sizes didn't matter, so much, maybe because of the fact that that data is really unpredictable, but after some experiments I switched to the best-practice approach in which AEs generally should be constructed - building a pyramid-like structure when it comes to channels. This is because AEs constantly reduce the dimension of images (width), so that we have to increase the channel amount (depth) to balance that process.
+Training process was full of strange situations. Lot of times I faced sudden nans as values of metrics as well as overfitting. I have also faced a few times sudden crashes or jumps in metrics.
 
-**Batch normalization** was crucial in this process. It definitely helped with prevention of sudden crashes in learning and stabilized it.
+#### NaN Problems
+![train_history_2](visualizations/training/train_history_2.jpg)
 
-bitcoin is really hard to predict (see on wpe metric) charts
-couldn't achieve good results
-switched to ^gspc (sp&500?) which has more data (since 1927, almost 100 years)
+#### Overfitting
+![train_history_1](visualizations/training/train_history_1.jpg)
+
+#### Sudden Crash/Jump
+![train_history_5](visualizations/training/train_history_5.jpg)
+
+I was constantly changing number of channels inside **convolutional** layers, their **kernel** (3, 5, 7) and **padding** (1, 2) sizes as well as **latent** dimensions and **batch size**. Unfortunately the order order of layer channel sizes didn't matter, so much, maybe because of the fact that that data is really unpredictable, but after some experiments I switched to the best-practice approach in which AEs generally should be constructed - building a pyramid-like structure when it comes to channels. This is because AEs constantly reduce the dimension of images (width), so that we have to increase the channel amount (depth) to balance that process. I have also stayed with papers 128 value as the **batch size** and 512 as **latent** dimension.
+
+**Batch normalization** was crucial in this process. It definitely helped with prevention of sudden crashes in learning and stabilized it, because models with higher parameters also were facing **overfitting**.
+
+In general, Bitcoin is really hard to predict and I couldn't achieve satisfying results on it, so I switched to S&P 500, but in this case the situation was similar.
 
 In addition I have tried on harmonic data generated synthetically similarly as written in paper, but I was disappointed by the results, model weren't learning efficiently and also metrics exploaded. Nevertheless it is imporant to put more time on that in the future.
+
+#### Highest Metrics Achieved
+On S&P 500 lower losses were possible to achieve as well as MASE and IoU. Sometimes sudden jsd loss decrement was correlated with higher MASE.
+
+The best IoU scores for Bitcoin validation data were around slightly below ~**0.8**. For MASE is was approximately ~**2.6**. When it comes to validation loss, the lowest values were around ~**0.50**, but almost each time were fluctuating in this range [0.5 ... 0.62].
+
+For S&P 500 there weren't so much experiments conducted as for Bitcoin, but the lowest values for loss were around ~**0.33**, but in such cases MASE metric was rapidly going up. Best values for MASE were close to ~**2.5**, but for IoU ~**0.06**.
 
 ## Model in action
 
