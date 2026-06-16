@@ -5,10 +5,12 @@ import numpy as np
 import torch
 
 def get_financial_data():
-    # data = yf.download('BTC-USD', start='2016-06-01', end='2026-06-01')
-    # values = data['Close']['BTC-USD'].values
+    data = yf.download('BTC-USD', start='2016-06-01', end='2026-06-01')
+    values = data['Close']['BTC-USD'].values
+    print(len(values))
     data = yf.download('^GSPC', start='1926-06-01', end='2026-06-01')
     values = data['Close']['^GSPC'].values
+    print(len(values))
     return values
 
 # def get_harmonic_data(num_examples=10000, sample_len=80):
