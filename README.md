@@ -34,7 +34,7 @@ In this project, similarly to what have been presented in this [paper](https://a
 
 ### Financial Context
 * **Open**: The price at which the asset started trading when the market opened for that specific day.
-* **Close**: The final price at which the asset traded when the market closed for the day. **correct since it is adjusted close by default probably**
+* **Close**: The final price at which the asset traded when the market closed for the day.
 * **High**: The absolute highest price that someone paid for the asset during that single day.
 * **Low**: The absolute lowest price reached during that day.
 * **Volume**: The total number of units (e.g., shares of stock or total Bitcoins) traded between buyers and sellers during that day.
